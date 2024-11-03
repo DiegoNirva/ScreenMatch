@@ -1,5 +1,6 @@
 package com.cursospring.moviestreaming.model;
 
+import com.cursospring.moviestreaming.repository.SeriesRepository;
 import com.cursospring.moviestreaming.service.ConsumoApi;
 import com.cursospring.moviestreaming.service.ConvertirDatos;
 
@@ -18,7 +19,13 @@ public class Principal {
 
     private final String KEY_API = "&apikey=69fb1797";
 
+    private SeriesRepository seriesRepository;
+
     private List<DatosSerie> datosSeries = new ArrayList<>();
+
+    public Principal(SeriesRepository seriesRepository) {
+           this.seriesRepository = seriesRepository;
+    }
 
 
     //muestra el menu.
@@ -76,16 +83,15 @@ public class Principal {
     //metodo para agregar la serie buscada en una list de tipo Datoserie (record)
     private void buscarSerieWeb(){
         DatosSerie datos = getDatosSerie();
-        datosSeries.add(datos);
+        //datosSeries.add(datos);
+        Serie serie = new Serie(datos);
+        seriesRepository.save(serie);
         System.out.println(datosSeries);
     }
 
     //metodo para recorrer e imprimir las series buscadas
     private void mostrarSeriesBuscadas() {
-        List<Serie> series = new ArrayList<>();
-        series = datosSeries.stream()
-                .map(d -> new Serie(d))
-                .collect(Collectors.toList());
+        List<Serie> series = seriesRepository.findAll();
 
         series.stream()
                 .sorted(Comparator.comparing(Serie ::getGenero))

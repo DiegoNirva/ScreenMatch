@@ -1,11 +1,20 @@
 package com.cursospring.moviestreaming.model;
 
 
+import jakarta.persistence.*;
+
 import java.util.OptionalDouble;
 
+@Entity
+@Table(name = "series")
 public class Serie {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long Id;
+    @Column(unique = true)
     private String titulo;
+    @Enumerated(EnumType.STRING)
     private Categoria genero;
     private String Sinopsis;
     private String poster;
@@ -13,6 +22,8 @@ public class Serie {
     private Integer totalDeTemporadas;
     private Double evaluacion;
 
+    public Serie() {
+    }
 
     public Serie(DatosSerie datosSerie) {
         this.actor = datosSerie.actor();
@@ -24,6 +35,13 @@ public class Serie {
         this.totalDeTemporadas = datosSerie.totalDeTemporadas();
     }
 
+    public Long getId() {
+        return Id;
+    }
+
+    public void setId(Long id) {
+        Id = id;
+    }
 
     public String getActor() {
         return actor;
