@@ -23,6 +23,8 @@ public class Principal {
 
     private List<DatosSerie> datosSeries = new ArrayList<>();
 
+    private List<Serie> series;
+
     public Principal(SeriesRepository seriesRepository) {
            this.seriesRepository = seriesRepository;
     }
@@ -33,11 +35,17 @@ public class Principal {
     public void muestraMenu() {
         var opcion = -1;
         while (opcion != 0) {
+            System.out.println("---------------------------------");
             System.out.println("Ingrese la opcion: " + '\n'
                     + "1) Buscar serie" + '\n'
                     + "2) Buscar Episodio" + '\n'
                     + "3) Mostrar serie buscadas" + '\n'
+                    + "4) Buscar serie" + '\n'
+                    + "5) Top 5 mejores series" + '\n'
+                    + "6) Buscar por genero/categoria" + '\n'
+                    + "7) Buscar por numero de temporada y evaluacion" + '\n'
                     + "0) Salir");
+            System.out.println("---------------------------------");
             opcion = in.nextInt();
             in.nextLine();
 
@@ -51,11 +59,25 @@ public class Principal {
                 case 3:
                     mostrarSeriesBuscadas();
                     break;
+                case 4:
+                    buscarSerie();
+                    break;
+                case 5:
+                    buscartop5Series();
+                case 6:
+                    buscarPorCategoria();
+                    break;
+                case 7:
+                    buscarPorNumeroTemporadaYEvaluacion();
+                    break;
                 default:
+                    System.out.println("Opcion no valida");
 
             }
         }
     }
+
+
 
     //metodo para buscar serie y covertir en un record
     private DatosSerie getDatosSerie() {
@@ -69,15 +91,32 @@ public class Principal {
 
     //metodo para buscar serie y episodio.
     private void buscarEpisodio() {
-        DatosSerie datosSerie = getDatosSerie();
-        List<DatosTemporada> datosTemporadas = new ArrayList<>();
+        mostrarSeriesBuscadas();
+        System.out.println("Ingrese el nombre de la serie a buscar");
+        String buscar = in.nextLine();
 
-        for (int i = 1; i <= datosSerie.totalDeTemporadas(); i++) {
-            var json = consumoApi.obtenerDatos(URL_BASE + datosSerie.titulo().replace(" ", "+") + "&Season=" + i + KEY_API);
-            DatosTemporada datosTemporadas1 = convertirDatos.convertirDatos(json, DatosTemporada.class);
-            datosTemporadas.add(datosTemporadas1);
+        Optional<Serie> serie = series.stream()
+                .filter(s->s.getTitulo().toLowerCase().contains(buscar.toLowerCase()))
+                .findFirst();
+
+        if(serie.isPresent()){
+            List<DatosTemporada> datosTemporadas = new ArrayList<>();
+            var serieEcontrada = serie.get();
+            for (int i = 1; i <= serieEcontrada.getTotalDeTemporadas(); i++) {
+                var json = consumoApi.obtenerDatos(URL_BASE + serieEcontrada.getTitulo().replace(" ", "+") + "&Season=" + i + KEY_API);
+                DatosTemporada datosTemporadas1 = convertirDatos.convertirDatos(json, DatosTemporada.class);
+                datosTemporadas.add(datosTemporadas1);
+            }
+            datosTemporadas.forEach(System.out::println);
+
+            List<Episodio> episodios = datosTemporadas.stream()
+                    .flatMap(d -> d.episodios().stream()
+                            .map(e-> new Episodio(d.temporada(), e)))
+                    .collect(Collectors.toList());
+            serieEcontrada.setEpisodios(episodios);
+            seriesRepository.save(serieEcontrada);
+
         }
-        datosTemporadas.forEach(System.out::println);
     }
 
     //metodo para agregar la serie buscada en una list de tipo Datoserie (record)
@@ -91,7 +130,7 @@ public class Principal {
 
     //metodo para recorrer e imprimir las series buscadas
     private void mostrarSeriesBuscadas() {
-        List<Serie> series = seriesRepository.findAll();
+        series = seriesRepository.findAll();
 
         series.stream()
                 .sorted(Comparator.comparing(Serie ::getGenero))
@@ -99,6 +138,49 @@ public class Principal {
 
     }
 
+    //metodo para buscar serie.
+    private void buscarSerie(){
+        System.out.println("Ingrese el nombre de la serie a buscar");
+        String buscar = in.nextLine();
+
+        Optional<Serie> serie = seriesRepository.findByTituloContainsIgnoreCase(buscar);
+        System.out.println("Se busco la serie:" + serie.get());
+    }
+    //metodo top 5 mejores series.
+    private void buscartop5Series() {
+        series = seriesRepository.findTop5ByOrderByEvaluacionDesc();
+        series.forEach(serie -> System.out.println("Serie: "+ serie.getTitulo() + " Evaluacion: " + serie.getEvaluacion()));
+    }
+
+    //metodo para buscar por categoria
+    private  void buscarPorCategoria(){
+        System.out.println("Ingrese el genero/categoria de la serie a buscar");
+        String buscarCategoria = in.nextLine();
+        var categoria = Categoria.fromEspaniol(buscarCategoria);
+        List<Serie> seriesPorCategoria = seriesRepository.findByGenero(categoria);
+
+        System.out.println("Series por categoria/genero " + buscarCategoria + " son:");
+        seriesPorCategoria.forEach(System.out::println);
+    }
+
+    //metodo para buscar por nº de temporada y evaluacion
+    private void buscarPorNumeroTemporadaYEvaluacion(){
+        System.out.println("Ingrese el numero de temporada a buscar");
+        int numTemporada = in.nextInt();
+        System.out.println("Ingrese la evaluacion a buscar");
+        double evaluacion = in.nextDouble();
+        in.nextLine();
+
+        List<Serie> seriePorTemYEva = seriesRepository.findBytotalDeTemporadasAndEvaluacion(numTemporada, evaluacion);
+
+        if(!seriePorTemYEva.isEmpty()){
+            System.out.println("Las series con "+ numTemporada + " Temporadas y de evaluacion "+ evaluacion + " son:");
+            seriePorTemYEva.forEach(System.out::println);
+        }else {
+            System.out.println("No se encontro la serie.");
+        }
+
+    }
 
 }
 

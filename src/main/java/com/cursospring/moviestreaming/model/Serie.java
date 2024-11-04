@@ -3,6 +3,7 @@ package com.cursospring.moviestreaming.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.OptionalDouble;
 
 @Entity
@@ -21,6 +22,11 @@ public class Serie {
     private String actor;
     private Integer totalDeTemporadas;
     private Double evaluacion;
+
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Episodio> episodios;
+
+
 
     public Serie() {
     }
@@ -99,6 +105,15 @@ public class Serie {
         this.totalDeTemporadas = totalDeTemporadas;
     }
 
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        episodios.forEach(e->e.setSerie(this));
+        this.episodios = episodios;
+    }
+
     @Override
     public String toString() {
         return
@@ -109,7 +124,8 @@ public class Serie {
                 ", Sinopsis='" + Sinopsis + '\'' +
                 ", poster='" + poster + '\'' +
                 ", totalDeTemporadas=" + totalDeTemporadas +
-                ", evaluacion=" + evaluacion;
+                ", evaluacion=" + evaluacion +
+                ", episodios=" + episodios;
 
     }
 }

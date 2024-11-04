@@ -1,9 +1,15 @@
 package com.cursospring.moviestreaming.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+@Entity
 public class Episodio {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
     private Integer temporada;
 
@@ -14,6 +20,13 @@ public class Episodio {
     private Double evaluacion;
 
     private LocalDate fechaDeLanzamiento;
+
+    @ManyToOne
+    @JoinColumn(name = "serie_id", nullable = false)
+    private Serie serie;
+
+    public Episodio() {
+    }
 
     public Episodio(Integer temporada, DatosEpisodio d) {
 
@@ -72,6 +85,14 @@ public class Episodio {
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
+    }
+
+    public Serie getSerie() {
+        return serie;
+    }
+
+    public void setSerie(Serie serie) {
+        this.serie = serie;
     }
 
     @Override

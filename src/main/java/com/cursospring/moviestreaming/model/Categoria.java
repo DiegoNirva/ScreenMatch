@@ -2,25 +2,36 @@ package com.cursospring.moviestreaming.model;
 
 public enum Categoria {
 
-    ACCION("Action"),
+    ACCION("Action", "Accion"),
 
-    ROMANCE("Romance"),
+    ROMANCE("Romance", "Romance"),
 
-    CRIMEN("Crime"),
+    CRIMEN("Crime", "Crimen"),
 
-    DRAMA("Drama"),
+    DRAMA("Drama", "Drama"),
 
-    COMEDIA("Comedy");
+    COMEDIA("Comedy", "Comedia");
 
     private String categoriaOmdb;
+    private String categoriaEspaniol;
 
-    Categoria(String categoriaOmdb){
+    Categoria(String categoriaOmdb, String categoriaEspaniol){
         this.categoriaOmdb = categoriaOmdb;
+        this.categoriaEspaniol = categoriaEspaniol;
     }
 
     public static Categoria fromString(String text){
         for(Categoria categoria : Categoria.values()){
             if (categoria.categoriaOmdb.equalsIgnoreCase(text)){
+                return categoria;
+            }
+        }
+        throw new IllegalArgumentException("Ninguna categoria encontrada: " + text);
+    }
+
+    public static Categoria fromEspaniol(String text){
+        for(Categoria categoria : Categoria.values()){
+            if (categoria.categoriaEspaniol.equalsIgnoreCase(text)){
                 return categoria;
             }
         }
