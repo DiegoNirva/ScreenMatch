@@ -40,10 +40,11 @@ public class Principal {
                     + "1) Buscar serie" + '\n'
                     + "2) Buscar Episodio" + '\n'
                     + "3) Mostrar serie buscadas" + '\n'
-                    + "4) Buscar serie" + '\n'
+                    + "4) Buscar serie por nombre" + '\n'
                     + "5) Top 5 mejores series" + '\n'
                     + "6) Buscar por genero/categoria" + '\n'
                     + "7) Buscar por numero de temporada y evaluacion" + '\n'
+                    + "8) Buscar por nombre de episodio" + '\n'
                     + "0) Salir");
             System.out.println("---------------------------------");
             opcion = in.nextInt();
@@ -69,6 +70,9 @@ public class Principal {
                     break;
                 case 7:
                     buscarPorNumeroTemporadaYEvaluacion();
+                    break;
+                case 8:
+                    buscarEpisodioPorNombre();
                     break;
                 default:
                     System.out.println("Opcion no valida");
@@ -171,7 +175,7 @@ public class Principal {
         double evaluacion = in.nextDouble();
         in.nextLine();
 
-        List<Serie> seriePorTemYEva = seriesRepository.findBytotalDeTemporadasAndEvaluacion(numTemporada, evaluacion);
+        List<Serie> seriePorTemYEva = seriesRepository.buscarSeriePorTemporadaYEvaluacion(numTemporada, evaluacion);
 
         if(!seriePorTemYEva.isEmpty()){
             System.out.println("Las series con "+ numTemporada + " Temporadas y de evaluacion "+ evaluacion + " son:");
@@ -180,6 +184,17 @@ public class Principal {
             System.out.println("No se encontro la serie.");
         }
 
+    }
+
+    //metodo para buscar episodio por nombre
+    private void buscarEpisodioPorNombre(){
+        System.out.println("Ingresa el nombre del episodio a buscar");
+        String nombreEpisodio = in.nextLine();
+        List<Episodio> episodios = seriesRepository.buscarEpisodioPorNombre(nombreEpisodio);
+        episodios.forEach(episodio -> System.out.println("Serie:" + episodio.getSerie() + '\n'
+                +" Episodio:" + episodio.getTitulo() + '\n'
+                +" Temporada:" + episodio.getTemporada() + '\n'
+                +" Evaluacion:" + episodio.getEvaluacion()));
     }
 
 }
