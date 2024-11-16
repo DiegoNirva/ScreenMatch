@@ -3,7 +3,7 @@ package com.cursospring.moviestreaming.dto;
 
 import com.cursospring.moviestreaming.model.Categoria;
 
-public record SerieDTO(
+public record SerieDTO(Long id,
         String titulo,
         Categoria genero,
         String sinopsis,

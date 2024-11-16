@@ -1,5 +1,7 @@
 package com.cursospring.moviestreaming.repository;
 
+import com.cursospring.moviestreaming.dto.EpisodioDTO;
+import com.cursospring.moviestreaming.dto.SerieDTO;
 import com.cursospring.moviestreaming.model.Categoria;
 import com.cursospring.moviestreaming.model.Episodio;
 import com.cursospring.moviestreaming.model.Serie;
@@ -31,5 +33,9 @@ public interface SeriesRepository extends JpaRepository<Serie, Long> {
 
     @Query(" SELECT s FROM Serie s " + " JOIN s.episodios e " + " GROUP BY s " + " ORDER BY MAX(e.fechaDeLanzamiento) DESC LIMIT 5 ")
     List<Serie> lanzamientosMasRecientes();
+
+    @Query(" SELECT e FROM Serie s JOIN s.episodios e WHERE s.id = :id AND e.temporada = :numeroDeTemporada")
+    List<Episodio> obtenerEpisodioPorTemporada(long id, long numeroDeTemporada);
+
 
 }
